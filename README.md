@@ -1,70 +1,33 @@
-# Getting Started with Create React App
+# swagger-client demo
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repo provides a small demonstration of using swagger-client npm package with some Salesforce REST API methods.
 
-## Available Scripts
+It includes a basic react front-end to capture the API inputs and an express back-end to make the reqest to the API.
 
-In the project directory, you can run:
+## Running
 
-### `npm start`
+From the root, run `node server.js`, then run `npm start`.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Inputs
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+#### Access token
 
-### `npm test`
+Generate an OAuth access token that the API will execute with.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The easiest way to do this is via this method: https://developer.salesforce.com/docs/atlas.en-us.api_iot.meta/api_iot/qs_auth_access_token.htm
 
-### `npm run build`
+#### Operation ID
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The server will pull the list of operation IDs from `salesforce.json`. Select which operation you want to execute.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+#### Body
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Based on the selected operation ID, a body will be generated based on the `parameters` and schema for `responseBody` if applicable.
 
-### `npm run eject`
+`serverVariables.myDomain` is always added and is required in order to execute the request against the appropriate Salesforce org.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Populate the `parameters` and properties in `requestBody` and click `Submit` to execute the request.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Response
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Assuming the server was able to execute a request, the response will be displayed in the client.

@@ -1,0 +1,112 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Salesforce REST API",
+    "version": "1"
+  },
+  "servers": [
+    {
+      "url": "https://{myDomain}.my.salesforce.com/services/data/v55.0",
+      "variables": {
+        "myDomain": {
+          "description": "The My Domain associated with the Salesforce org"
+        }
+      }
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "oauth": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "/services/oauth2/authorize",
+            "tokenUrl": "/services/oauth2/token",
+            "refreshUrl": "/services/oauth2/refresh",
+            "scopes": {
+              "api": "Manage user data via APIs",
+              "refresh_token": "Perform requests at any time",
+              "offline_access": "Perform requests at any time"
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth": ["api"]
+    }
+  ],
+  "paths": {
+    "/sobjects/Contact/Email/{email}": {
+      "get": {
+        "operationId": "getContact",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    },
+    "/sobjects/Mentorloop_loop__c/Loop_ID__c/{loopId}": {
+      "patch": {
+        "operationId": "upsertLoop",
+        "parameters": [
+          {
+            "name": "loopId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mentor__c": {
+                    "type": "string"
+                  },
+                  "mentee__c": {
+                    "type": "string"
+                  },
+                  "status__c": {
+                    "type": "string"
+                  },
+                  "closed_date__c": {
+                    "type": "string",
+                    "format": "datetime"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}
