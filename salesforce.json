@@ -82,11 +82,25 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "mentor__c": {
-                    "type": "string"
+                  "mentor__r": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "ML_role_ID__c": {
+                          "type": "string"
+                        }
+                      }
+                    }
                   },
-                  "mentee__c": {
-                    "type": "string"
+                  "mentee__r": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "ML_role_ID__c": {
+                          "type": "string"
+                        }
+                      }
+                    }
                   },
                   "status__c": {
                     "type": "string"
