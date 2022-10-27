@@ -5,51 +5,58 @@ const eventMethod = (method) => (event) => method(event.target.value);
 
 const Form = () => {
   const [accessToken, setAccessToken] = useState("");
+  const [service, setService] = useState("");
   const [operationId, setOperationId] = useState("");
   const [body, setBody] = useState(JSON.stringify({}, null, " "));
   const [results, setResults] = useState();
   const [operationIds, setOperationIds] = useState([]);
 
   useEffect(() => {
-    fetch(`/sf?operationId=${operationId}`)
-      .then(async (result) => {
-        if (result.ok) {
-          const resultJson = await result.json();
-          resultJson.serverVariables = { myDomain: "" };
-          setBody(JSON.stringify(resultJson, null, "  "));
-        } else {
-          console.error(result);
-        }
-      })
-      .catch(console.error);
-  }, [operationId]);
+    if (service) {
+      fetch(`/services/${service}/operations/${operationId}`)
+        .then(async (result) => {
+          if (result.ok) {
+            const resultJson = await result.json();
+            setBody(JSON.stringify(resultJson, null, "  "));
+          } else {
+            console.error(result);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [service, operationId]);
 
   useEffect(() => {
-    fetch("/sf/operations")
-      .then(async (result) => {
-        if (result.ok) {
-          const resultJson = await result.json();
-          setOperationIds(resultJson);
-        }
-      })
-      .catch(console.error);
-  }, []);
+    if (service) {
+      fetch(`/services/${service}/operations`)
+        .then(async (result) => {
+          if (result.ok) {
+            const resultJson = await result.json();
+            setOperationIds(resultJson);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [service]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!operationId) {
-      alert("Select an operation");
+    if (!(service && operationId)) {
+      alert("Select a service and an operation");
       return;
     }
     try {
-      const result = await fetch(`/sf?operationId=${operationId}`, {
-        method: "POST",
-        body: body,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: accessToken,
-        },
-      });
+      const result = await fetch(
+        `/services/${service}/operations/${operationId}`,
+        {
+          method: "POST",
+          body: body,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: accessToken,
+          },
+        }
+      );
       const contentType = result.headers.get("content-type");
       if (contentType && contentType.indexOf("application/json") !== -1) {
         setResults(await result.json());
@@ -74,11 +81,23 @@ const Form = () => {
             }}
           >
             <div>
-              <label>Access token</label>
-              <input
-                value={accessToken}
-                onChange={eventMethod(setAccessToken)}
-              />
+              <label>
+                Access token / API key:&nbsp;
+                <input
+                  value={accessToken}
+                  onChange={eventMethod(setAccessToken)}
+                />
+              </label>
+            </div>
+            <div>
+              <label>
+                Service:&nbsp;
+                <select value={service} onChange={eventMethod(setService)}>
+                  <option value="" label="--select one--" />
+                  <option value="salesforce" label="Salesforce" />
+                  <option value="hubspot" label="HubSpot" />
+                </select>
+              </label>
             </div>
             <div>
               <label>

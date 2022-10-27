@@ -3,7 +3,13 @@ const app = express();
 const port = process.env.PORT || 5000;
 const SwaggerClient = require("swagger-client");
 const salesforce = require("./salesforce.json");
+const hubspot = require("./hubspot.json");
 const jsf = require("json-schema-faker");
+
+const services = {
+  salesforce: salesforce,
+  hubspot: hubspot,
+};
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
@@ -13,62 +19,96 @@ app.get("/express_backend", (req, res) => {
   res.send({ express: "YOUR EXPRESS BACKEND IS CONNECTED TO REACT" });
 });
 
-app.get("/sf/operations", (req, res) => {
+app.get("/services/:service/operations", (req, res) => {
+  const service = services[req.params.service];
   const operationIds = [];
-  Object.keys(salesforce.paths).forEach((path) => {
-    Object.keys(salesforce.paths[path]).forEach((operation) => {
+  Object.keys(service.paths).forEach((path) => {
+    Object.keys(service.paths[path]).forEach((operation) => {
       if (
-        salesforce.paths[path][operation].hasOwnProperty("operationId") &&
-        salesforce.paths[path][operation].operationId
+        service.paths[path][operation].hasOwnProperty("operationId") &&
+        service.paths[path][operation].operationId
       ) {
-        operationIds.push(salesforce.paths[path][operation].operationId);
+        operationIds.push(service.paths[path][operation].operationId);
       }
     });
   });
   res.send(operationIds);
 });
 
-app.get("/sf", (req, res) => {
-  const operationId = req.query.operationId;
+app.get("/services/:service/operations/:operationId", (req, res) => {
+  const service = services[req.params.service];
+  const operationId = req.params.operationId;
   let operationObj = {};
-  Object.keys(salesforce.paths).forEach((path) => {
-    Object.keys(salesforce.paths[path]).forEach((operation) => {
+
+  jsf.option("alwaysFakeOptionals", true);
+
+  Object.keys(service.paths).forEach((path) => {
+    Object.keys(service.paths[path]).forEach((operation) => {
       if (
-        salesforce.paths[path][operation].hasOwnProperty("operationId") &&
-        salesforce.paths[path][operation].operationId === operationId
+        service.paths[path][operation].hasOwnProperty("operationId") &&
+        service.paths[path][operation].operationId === operationId
       ) {
-        const parameters = salesforce.paths[path][operation].parameters?.reduce(
-          (obj, item) => Object.assign(obj, { [item.name]: "" }),
-          {}
-        );
-        const schema =
-          salesforce.paths[path][operation].requestBody?.content[
+        const parametersSchema = service.paths[path][operation].parameters && {
+          type: "object",
+          additionalProperties: false,
+          properties: service.paths[path][operation].parameters.reduce(
+            (obj, item) => Object.assign(obj, { [item.name]: item.schema }),
+            {}
+          ),
+        };
+
+        const parameters = parametersSchema && jsf.generate(parametersSchema);
+
+        const requestBodySchema =
+          service.paths[path][operation].requestBody?.content[
             "application/json"
           ]?.schema;
-        jsf.option("alwaysFakeOptionals", true);
-        const requestBody = schema && jsf.generate(schema);
-        operationObj = { parameters, ...(requestBody && { requestBody }) };
+
+        const requestBody =
+          requestBodySchema && jsf.generate(requestBodySchema);
+
+        const serverVariablesSchema = service.servers[0].variables && {
+          type: "object",
+          additionalProperties: false,
+          properties: Object.fromEntries(
+            Object.keys(service.servers[0].variables).map((key) => [
+              key,
+              { type: "string" },
+            ])
+          ),
+        };
+        const serverVariables =
+          serverVariablesSchema && jsf.generate(serverVariablesSchema);
+
+        operationObj = {
+          parameters,
+          ...(requestBody && { requestBody }),
+          ...(serverVariables && { serverVariables }),
+        };
       }
     });
   });
   res.send(operationObj);
 });
 
-app.post("/sf", async (req, res) => {
+app.post("/services/:service/operations/:operationId", async (req, res) => {
   try {
-    const operationId = req.query.operationId;
+    const service = services[req.params.service];
+    const operationId = req.params.operationId;
     const access_token = req.header("Authorization");
     const data = req.body;
+    const securityKey = Object.keys(service.components.securitySchemes)[0];
+    const securityType = service.components.securitySchemes[securityKey].type;
+    const authorized = {
+      [securityKey]:
+        securityType === "oauth2" ? { token: { access_token } } : access_token,
+    };
     const result = await SwaggerClient.execute({
-      spec: salesforce,
+      spec: service,
       operationId: operationId,
       ...data,
       securities: {
-        authorized: {
-          oauth: {
-            token: { access_token },
-          },
-        },
+        authorized,
       },
     });
     res.send(result);

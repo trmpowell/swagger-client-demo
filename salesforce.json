@@ -48,7 +48,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "email"
             }
           }
         ],
@@ -81,10 +82,12 @@
             "application/json": {
               "schema": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "mentor__r": {
                     "schema": {
                       "type": "object",
+                      "additionalProperties": false,
                       "properties": {
                         "ML_role_ID__c": {
                           "type": "string"
@@ -95,6 +98,7 @@
                   "mentee__r": {
                     "schema": {
                       "type": "object",
+                      "additionalProperties": false,
                       "properties": {
                         "ML_role_ID__c": {
                           "type": "string"
@@ -109,8 +113,7 @@
                     "type": "string",
                     "format": "datetime"
                   }
-                },
-                "additionalProperties": false
+                }
               }
             }
           }
