@@ -9,7 +9,8 @@
       "url": "https://{myDomain}.my.salesforce.com/services/data/v55.0",
       "variables": {
         "myDomain": {
-          "description": "The My Domain associated with the Salesforce org"
+          "description": "The My Domain associated with the Salesforce org",
+          "default": ""
         }
       }
     }
@@ -56,8 +57,12 @@
         "responses": {
           "200": {
             "description": "OK",
-            "schema": {
-              "type": "object"
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
             }
           }
         }
@@ -85,24 +90,20 @@
                 "additionalProperties": false,
                 "properties": {
                   "mentor__r": {
-                    "schema": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "ML_role_ID__c": {
-                          "type": "string"
-                        }
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "ML_role_ID__c": {
+                        "type": "string"
                       }
                     }
                   },
                   "mentee__r": {
-                    "schema": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "properties": {
-                        "ML_role_ID__c": {
-                          "type": "string"
-                        }
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "ML_role_ID__c": {
+                        "type": "string"
                       }
                     }
                   },
